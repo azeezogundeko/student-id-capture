@@ -40,8 +40,10 @@ A complete production-ready web application for capturing and managing student p
 
 ### Infrastructure
 - **Storage**: AWS S3
-- **Frontend Hosting**: Vercel
-- **Backend Hosting**: Render / Railway / AWS EC2
+- **Frontend Hosting**: Vercel / Docker
+- **Backend Hosting**: Render / Railway / AWS EC2 / Docker
+- **Containerization**: Docker & Docker Compose
+- **Reverse Proxy**: Traefik (with Let's Encrypt)
 - **Authentication**: IAM (AWS)
 
 ---
@@ -311,6 +313,35 @@ vercel
 - Railway (Backend)
 - AWS EC2 (Backend)
 - Netlify (Frontend alternative)
+
+### Docker Deployment (Recommended)
+
+**Deploy with Docker Compose + Traefik:**
+
+```bash
+# 1. Configure environment
+cp .env.example .env
+nano .env  # Add AWS credentials
+
+# 2. Deploy
+docker compose up -d
+
+# 3. View logs
+docker compose logs -f
+
+# 4. Check status
+docker compose ps
+```
+
+**Features:**
+- Automatic SSL with Let's Encrypt
+- Domain: `studentscapture.boboyii.app`
+- Health checks
+- Auto-restart
+- Security headers
+- CORS configured
+
+**Complete Docker guide:** [docs/DOCKER_DEPLOYMENT.md](docs/DOCKER_DEPLOYMENT.md)
 
 ---
 

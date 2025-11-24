@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 5000
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - FRONTEND_URL=https://studentscapture.boboyii.app
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-5242880}
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.student-capture-api.rule=Host(`studentscapture.boboyii.app`) && PathPrefix(`/api`, `/health`)"
+      - "traefik.http.routers.student-capture-api.entrypoints=websecure"
+      - "traefik.http.routers.student-capture-api.tls.certResolver=letsencrypt"
+      - "traefik.http.services.student-capture-api.loadbalancer.server.port=5000"
+      # CORS headers middleware
+      - "traefik.http.middlewares.student-capture-cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
+      - "traefik.http.middlewares.student-capture-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.student-capture-cors.headers.accesscontrolalloworiginlist=https://studentscapture.boboyii.app"
+      - "traefik.http.middlewares.student-capture-cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.student-capture-cors.headers.addvaryheader=true"
+      - "traefik.http.routers.student-capture-api.middlewares=student-capture-cors"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # Frontend Next.js Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: prod.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://studentscapture.boboyii.app
+    restart: always
+    ports:
+      - 3000
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://studentscapture.boboyii.app
+    networks:
+      - dokploy-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.student-capture-app.rule=Host(`studentscapture.boboyii.app`)"
+      - "traefik.http.routers.student-capture-app.entrypoints=websecure"
+      - "traefik.http.routers.student-capture-app.tls.certResolver=letsencrypt"
+      - "traefik.http.services.student-capture-app.loadbalancer.server.port=3000"
+      # Security headers middleware
+      - "traefik.http.middlewares.student-capture-security.headers.framedeny=true"
+      - "traefik.http.middlewares.student-capture-security.headers.sslredirect=true"
+      - "traefik.http.middlewares.student-capture-security.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.student-capture-security.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.student-capture-security.headers.stsPreload=true"
+      - "traefik.http.middlewares.student-capture-security.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.student-capture-security.headers.browserXssFilter=true"
+      - "traefik.http.routers.student-capture-app.middlewares=student-capture-security"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+networks:
+  dokploy-network:
+    external: true
