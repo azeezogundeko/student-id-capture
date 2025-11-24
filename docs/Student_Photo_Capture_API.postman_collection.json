@@ -1,0 +1,161 @@
+{
+  "info": {
+    "name": "Student Photo Capture API",
+    "description": "Complete API collection for Student Photo Capture System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Check API health status"
+      },
+      "response": []
+    },
+    {
+      "name": "Classes",
+      "item": [
+        {
+          "name": "Get All Classes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/classes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "classes"]
+            },
+            "description": "Retrieve all classes from S3"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Class",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"className\": \"JSS1 Jasper\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/classes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "classes"]
+            },
+            "description": "Create a new class"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "Get Students by Class",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/students/:className",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "students", ":className"],
+              "variable": [
+                {
+                  "key": "className",
+                  "value": "JSS1 Jasper",
+                  "description": "Class name (URL encoded automatically)"
+                }
+              ]
+            },
+            "description": "Get all students in a specific class with pre-signed URLs for viewing photos"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Upload",
+      "item": [
+        {
+          "name": "Upload Photo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "className",
+                  "value": "JSS1 Jasper",
+                  "type": "text"
+                },
+                {
+                  "key": "studentName",
+                  "value": "John Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select an image file (JPEG, PNG, or WebP)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload"]
+            },
+            "description": "Upload a student photo to S3. The photo will be saved as className/studentName.jpeg"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pre-signed Upload URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"className\": \"JSS1 Jasper\",\n  \"studentName\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/presigned",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "upload", "presigned"]
+            },
+            "description": "Generate a pre-signed URL for direct client-side upload to S3. Use the returned uploadUrl to PUT the file directly to S3."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
