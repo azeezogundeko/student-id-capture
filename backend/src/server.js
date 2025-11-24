@@ -6,6 +6,7 @@ require('dotenv').config();
 const classRoutes = require('./routes/classes');
 const studentRoutes = require('./routes/students');
 const uploadRoutes = require('./routes/upload');
+const adminRoutes = require('./routes/admin');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -33,6 +34,7 @@ app.get('/health', (req, res) => {
 app.use('/api/classes', classRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -50,6 +52,13 @@ app.get('/', (req, res) => {
       upload: {
         'POST /api/upload': 'Upload student photo',
         'POST /api/upload/presigned': 'Get pre-signed upload URL',
+      },
+      admin: {
+        'POST /api/admin/login': 'Admin login',
+        'GET /api/admin/classes': 'Get all classes with students (Auth required)',
+        'GET /api/admin/stats': 'Get statistics (Auth required)',
+        'GET /api/admin/download/image/:className/:studentName': 'Download image (Auth required)',
+        'GET /api/admin/download/class/:className': 'Download class as ZIP (Auth required)',
       },
       health: {
         'GET /health': 'Health check',
