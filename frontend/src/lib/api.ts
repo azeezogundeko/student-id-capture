@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Use production API endpoint by default
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.studentscapture.boboyii.app';
 
 const api = axios.create({
   baseURL: API_URL,
