@@ -84,6 +84,9 @@ app.listen(PORT, () => {
   console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🪣 S3 Bucket: ${process.env.S3_BUCKET_NAME || 'Not configured'}`);
   console.log(`🌍 Region: ${process.env.AWS_REGION || 'Not configured'}`);
+  if (process.env.S3_ENDPOINT_URL) {
+    console.log(`🔗 S3 Endpoint: ${process.env.S3_ENDPOINT_URL}`);
+  }
   console.log(`\n✨ Ready to capture student photos!\n`);
 });
 
