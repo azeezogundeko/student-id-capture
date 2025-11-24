@@ -7,8 +7,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - 5000
     environment:
       - PORT=5000
       - NODE_ENV=production
@@ -25,7 +23,7 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.student-capture-api.rule=Host(`studentscapture.boboyii.app`) && PathPrefix(`/api`, `/health`)"
+      - "traefik.http.routers.student-capture-api.rule=Host(`api.studentscapture.boboyii.app`)"
       - "traefik.http.routers.student-capture-api.entrypoints=websecure"
       - "traefik.http.routers.student-capture-api.tls.certResolver=letsencrypt"
       - "traefik.http.services.student-capture-api.loadbalancer.server.port=5000"
@@ -49,13 +47,11 @@ services:
       context: ./frontend
       dockerfile: prod.Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: https://studentscapture.boboyii.app
+        NEXT_PUBLIC_API_URL: https://api.studentscapture.boboyii.app
     restart: always
-    ports:
-      - 3006
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=https://studentscapture.boboyii.app
+      - NEXT_PUBLIC_API_URL=https://api.studentscapture.boboyii.app
     networks:
       - dokploy-network
     depends_on:

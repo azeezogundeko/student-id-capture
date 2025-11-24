@@ -2,16 +2,38 @@
 
 ## Issue Diagnosis
 
-The "page not found" error was caused by **missing environment variables**. The `.env` file wasn't created, which means Docker Compose couldn't load the required S3 and admin authentication credentials.
+The "page not found" error was caused by **two critical issues**:
+
+1. **Missing environment variables** - The `.env` file wasn't created, which means Docker Compose couldn't load the required S3 and admin authentication credentials.
+2. **Domain routing conflict** - Both frontend and backend were using the same domain with conflicting Traefik rules, causing routing issues.
 
 ## Fixed Issues
 
 1. ✅ Added `ADMIN_PASSWORD` and `JWT_SECRET` to docker-compose.yml
 2. ✅ Created `.env` file with all required configuration variables
+3. ✅ **Implemented subdomain routing** for proper Traefik configuration:
+   - **Frontend**: `studentscapture.boboyii.app`
+   - **Backend API**: `api.studentscapture.boboyii.app`
+4. ✅ Updated API URL configuration in frontend to use correct backend subdomain
+5. ✅ Removed unnecessary port mappings (Traefik connects via Docker network)
 
 ## Deployment Steps
 
-### 1. Configure Environment Variables
+### 1. Configure DNS Records
+
+**IMPORTANT**: You need to add a DNS A record for the API subdomain:
+
+```
+api.studentscapture.boboyii.app → [Your Server IP]
+```
+
+This should point to the same IP as your main domain. In your DNS provider:
+- **Record Type**: A
+- **Name**: `api.studentscapture` or `api`
+- **Value**: Your server's IP address
+- **TTL**: 300 (or your preference)
+
+### 2. Configure Environment Variables
 
 Edit the `.env` file in the project root and replace the placeholder values with your actual credentials:
 
@@ -143,12 +165,13 @@ docker compose logs frontend --tail=50
 Once deployed successfully:
 
 1. **Access the frontend:** https://studentscapture.boboyii.app
-2. **Test camera capture:** Allow camera permissions when prompted
-3. **Create a class:** e.g., "JSS1 Jasper"
-4. **Capture photos:** Take photos of students
-5. **Access admin dashboard:** https://studentscapture.boboyii.app/admin
+2. **Verify API endpoint:** https://api.studentscapture.boboyii.app/health (should return `{"status":"ok"}`)
+3. **Test camera capture:** Allow camera permissions when prompted
+4. **Create a class:** e.g., "JSS1 Jasper"
+5. **Capture photos:** Take photos of students
+6. **Access admin dashboard:** https://studentscapture.boboyii.app/admin
    - Password: `EngrOgundeko` (or what you set in .env)
-6. **Test downloads:** Download individual images or entire classes as ZIP
+7. **Test downloads:** Download individual images or entire classes as ZIP
 
 ## Security Notes
 
