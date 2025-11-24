@@ -29,6 +29,9 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 # Disable Next.js telemetry
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Enable standalone output for Docker
+ENV DOCKER_BUILD=true
+
 # Build Next.js application
 RUN npm run build
 
