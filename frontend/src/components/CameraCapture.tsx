@@ -8,16 +8,21 @@ interface CameraCaptureProps {
   onCancel: () => void;
 }
 
-const videoConstraints = {
-  width: 1280,
-  height: 720,
-  facingMode: 'user',
-};
-
 export default function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
   const webcamRef = useRef<Webcam>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: facingMode,
+  };
+
+  const toggleCamera = () => {
+    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
+  };
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot();
@@ -89,7 +94,32 @@ export default function CameraCapture({ onCapture, onCancel }: CameraCaptureProp
               videoConstraints={videoConstraints}
               onUserMediaError={handleUserMediaError}
               className="w-full rounded-lg"
+              key={facingMode}
             />
+            {/* Camera switch button - top right */}
+            <button
+              onClick={toggleCamera}
+              className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all"
+              title={facingMode === 'user' ? 'Switch to Back Camera' : 'Switch to Front Camera'}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </button>
+            {/* Camera mode indicator */}
+            <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+              {facingMode === 'user' ? '🤳 Front Camera' : '📷 Back Camera'}
+            </div>
             <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
               <button onClick={capture} className="btn-primary">
                 <svg
