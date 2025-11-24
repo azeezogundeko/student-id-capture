@@ -50,6 +50,9 @@ export default function Home() {
       setError('');
       await createClass(className);
       await loadClasses();
+      // Automatically select the newly created class and go to capture step
+      setSelectedClass(className);
+      setStep('capture-photo');
     } catch (err: any) {
       throw err;
     } finally {
