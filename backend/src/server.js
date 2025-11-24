@@ -26,11 +26,13 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 
-// Middleware
+// Middleware - Apply CORS before helmet to ensure CORS headers are set first
+app.use(cors(corsOptions));
 app.use(helmet({
   crossOriginResourcePolicy: false, // Disable CORP to prevent conflicts with CORS
+  crossOriginEmbedderPolicy: false, // Disable COEP
+  contentSecurityPolicy: false, // Disable CSP for API
 }));
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
