@@ -7,6 +7,7 @@ import {
   fetchAdminStats,
   downloadImage,
   downloadClass,
+  downloadAllClasses,
   AdminClass,
   AdminStats,
 } from '@/lib/api';
@@ -20,6 +21,7 @@ export default function AdminDashboard() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [downloadingClass, setDownloadingClass] = useState<string | null>(null);
   const [downloadingImage, setDownloadingImage] = useState<string | null>(null);
+  const [downloadingAll, setDownloadingAll] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false); // Default to off to save S3 transactions
   const router = useRouter();
 
@@ -108,6 +110,20 @@ export default function AdminDashboard() {
     }
   };
 
+  // Handle download all classes
+  const handleDownloadAllClasses = async () => {
+    if (!token) return;
+
+    try {
+      setDownloadingAll(true);
+      await downloadAllClasses(token);
+    } catch (err: any) {
+      alert(err.message || 'Failed to download all classes');
+    } finally {
+      setDownloadingAll(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -187,6 +203,28 @@ export default function AdminDashboard() {
                   />
                 </svg>
                 Refresh
+              </button>
+
+              {/* Download All Classes button */}
+              <button
+                onClick={handleDownloadAllClasses}
+                disabled={downloadingAll}
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <svg
+                  className="w-5 h-5 inline mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                {downloadingAll ? 'Downloading...' : 'Download All'}
               </button>
 
               {/* Logout button */}

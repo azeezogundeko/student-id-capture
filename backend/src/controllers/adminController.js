@@ -273,10 +273,98 @@ async function getAdminStats(req, res) {
   }
 }
 
+/**
+ * GET /api/admin/download/all - Download all classes as ZIP
+ */
+async function downloadAllClasses(req, res) {
+  try {
+    // Get all classes
+    const classes = await listAllClasses();
+
+    if (classes.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'No classes found',
+      });
+    }
+
+    // Set headers for ZIP download
+    const zipFileName = 'all_classes.zip';
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
+
+    // Create ZIP archive
+    const archive = archiver('zip', {
+      zlib: { level: 9 }, // Maximum compression
+    });
+
+    // Handle errors
+    archive.on('error', (err) => {
+      console.error('Archive error:', err);
+      throw err;
+    });
+
+    // Pipe archive to response
+    archive.pipe(res);
+
+    // Process each class
+    for (const classItem of classes) {
+      try {
+        const students = await listStudentsInClass(classItem.className);
+
+        // Add each student's image to the archive in a class folder
+        for (const student of students) {
+          try {
+            const command = new GetObjectCommand({
+              Bucket: BUCKET_NAME,
+              Key: student.key,
+            });
+
+            const response = await s3Client.send(command);
+
+            if (response.Body instanceof Readable) {
+              // Add stream to archive with class folder structure
+              archive.append(response.Body, {
+                name: `${classItem.className}/${student.studentName}.jpeg`,
+              });
+            } else {
+              // Handle buffer
+              archive.append(response.Body, {
+                name: `${classItem.className}/${student.studentName}.jpeg`,
+              });
+            }
+          } catch (error) {
+            console.error(
+              `Failed to add ${student.studentName} from ${classItem.className}:`,
+              error
+            );
+            // Continue with other students
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to process class ${classItem.className}:`, error);
+        // Continue with other classes
+      }
+    }
+
+    // Finalize archive
+    await archive.finalize();
+  } catch (error) {
+    console.error('Download all classes error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to download all classes',
+      });
+    }
+  }
+}
+
 module.exports = {
   postAdminLogin,
   getAdminClasses,
   downloadImage,
   downloadClass,
+  downloadAllClasses,
   getAdminStats,
 };

@@ -6,6 +6,7 @@ const {
   getAdminClasses,
   downloadImage,
   downloadClass,
+  downloadAllClasses,
   getAdminStats,
 } = require('../controllers/adminController');
 
@@ -17,5 +18,6 @@ router.get('/classes', adminAuthMiddleware, getAdminClasses);
 router.get('/stats', adminAuthMiddleware, getAdminStats);
 router.get('/download/image/:className/:studentName', adminAuthMiddleware, downloadImage);
 router.get('/download/class/:className', adminAuthMiddleware, downloadClass);
+router.get('/download/all', adminAuthMiddleware, downloadAllClasses);
 
 module.exports = router;

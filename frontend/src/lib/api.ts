@@ -240,4 +240,32 @@ export async function downloadClass(token: string, className: string): Promise<v
   }
 }
 
+export async function downloadAllClasses(token: string): Promise<void> {
+  try {
+    const response = await axios.get(
+      '/api/admin/download/all',
+      {
+        baseURL: API_URL,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: 'blob',
+      }
+    );
+
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'all_classes.zip');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error: any) {
+    console.error('Download all classes error:', error);
+    throw new Error('Failed to download all classes');
+  }
+}
+
 export default api;
