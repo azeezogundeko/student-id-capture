@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [downloadingClass, setDownloadingClass] = useState<string | null>(null);
   const [downloadingImage, setDownloadingImage] = useState<string | null>(null);
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh] = useState(false); // Default to off to save S3 transactions
   const router = useRouter();
 
   // Check authentication
@@ -63,13 +63,13 @@ export default function AdminDashboard() {
     }
   }, [token, loadData]);
 
-  // Auto-refresh every 10 seconds
+  // Auto-refresh every 60 seconds (if enabled)
   useEffect(() => {
     if (!autoRefresh || !token) return;
 
     const interval = setInterval(() => {
       loadData();
-    }, 10000); // 10 seconds
+    }, 60000); // 60 seconds (1 minute)
 
     return () => clearInterval(interval);
   }, [autoRefresh, token, loadData]);
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
                     }`}
                   ></div>
                 </div>
-                <span className="ml-3 text-sm text-gray-700">Auto-refresh (10s)</span>
+                <span className="ml-3 text-sm text-gray-700">Auto-refresh (60s)</span>
               </label>
 
               {/* Refresh button */}
